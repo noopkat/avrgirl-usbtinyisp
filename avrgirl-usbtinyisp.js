@@ -1,5 +1,4 @@
 var C = require('./lib/c');
-// var usb = require('usb');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var usbtinyisp = require('usbtinyisp');
@@ -46,9 +45,12 @@ avrgirlUsbTinyIsp.prototype.enterProgrammingMode = function (callback) {
 
   this.setSCK(this.options.sck, function(error) {
     if (error) { return callback(error) }
-    self.programmer.spi(cmd, function (error) {
-      return callback(error);
-    });
+    // is this timeout necessary?
+    setTimeout(function() {
+      self.programmer.spi(cmd, function (error) {
+        return callback(error);
+      });
+    }, 50);
   });
 };
 
@@ -68,7 +70,7 @@ avrgirlUsbTinyIsp.prototype.setSCK = function (rate, callback) {
   });
 };
 
-avrgirlUsbTinyIsp.prototype.getSignature = function (callback) {
+avrgirlUsbTinyIsp.prototype.getChipSignature = function (callback) {
   var response = [];
   var signature = this.options.chip.signature;
   var cmd = new Buffer(signature.read);
@@ -101,20 +103,95 @@ avrgirlUsbTinyIsp.prototype.verifySignature = function (sig, data, callback) {
   callback(error);
 };
 
-avrgirlUsbTinyIsp.prototype.writeFlash = function (data, callback) {
+avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
+  var self = this;
+  var options = this.options.chip;
+  var pageAddress = 0;
+  var useAddress;
+  var pageSize = options[memType].pageSize;
+  var addressOffset = options[memType].addressOffset;
+  var data;
 
+  async.whilst(
+    function testEndOfFile() {
+      // case for data being flashed being less than one page in size
+      if (pageAddress === 0 && hex.length < pageSize) {
+        return false;
+      }
+      return pageAddress < hex.length;
+    },
+    function programPage (pagedone) {
+      async.series([
+        function loadAddress (done) {
+          useAddress = pageAddress >> addressOffset;
+          self.loadAddress(memType, useAddress, done);
+        },
+        function writeToPage (done) {
+          data = hex.slice(pageAddress, (hex.length > pageSize ? (pageAddress + pageSize) : hex.length - 1));
+          // fix this hard coded 0 delay
+          self.loadPage(memType, 0, pageAddress, data, done);
+        },
+        function calcNextPage (done) {
+          pageAddress = pageAddress + data.length;
+          // not sure if this timeout is needed, test thoroughly
+          setTimeout(done, 4);
+        }
+      ],
+      function pageIsDone (error) {
+        pagedone(error);
+      });
+    },
+    function (error) {
+      return callback(error);
+    }
+  );
 };
 
-avrgirlUsbTinyIsp.prototype.readFlash = function (length, callback) {
-
+avrgirlUsbTinyIsp.prototype.loadPage = function (memType, delay, address, buffer, callback) {
+  if (memType === 'flash') {
+    this.programmer.writeFlash(delay, address, buffer, function (err, result) {
+      return callback(error);
+    });
+  } else {
+    this.programmer.writeEeprom(delay, address, buffer, function (err, result) {
+      return callback(error);
+    });
+  }
 };
 
-avrgirlUsbTinyIsp.prototype.writeEeprom = function (data, callback) {
+avrgirlUsbTinyIsp.prototype.loadAddress = function (memType, address, callback) {
+  // this here the bytes should be taken from write[1] array for each memtype instead
+  // this is just to see if it's working
+  var memCmd = memType === 'flash' ? 0x4C : 0xC2;
+  var low = address & 0xff;
+  var high = (address >> 8) & 0xff;
+  var cmd = new Buffer([memCmd, high, low, 0x00]);
 
+  this.programmer.spi(cmd, function(error, result){
+    return callback(error, result);
+  });
+}
+
+avrgirlUsbTinyIsp.prototype.writeFlash = function (hex, callback) {
+  // optional convenience method
+  this.writeMem('flash', hex, function (error) {
+    return callback(error);
+  });
 };
 
-avrgirlUsbTinyIsp.prototype.readEeprom = function (length, callback) {
+avrgirlUsbTinyIsp.prototype.readFlash = function (length, address, callback) {
+  return this.programmer.readFlash(this.options.chip.flash.delay, address, length, callback);
+};
 
+avrgirlUsbTinyIsp.prototype.writeEeprom = function (hex, callback) {
+   // optional convenience method
+  this.writeMem('eeprom', hex, function (error) {
+    return callback(error);
+  });
+};
+
+avrgirlUsbTinyIsp.prototype.readEeprom = function (length, address, callback) {
+  return this.programmer.readEeprom(this.options.chip.eeprom.delay, address, length, callback);
 };
 
 module.exports = avrgirlUsbTinyIsp;

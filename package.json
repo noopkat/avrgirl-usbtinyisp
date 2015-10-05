@@ -20,6 +20,7 @@
   "author": "Suz Hinton",
   "license": "MIT",
   "dependencies": {
+    "async": "^1.4.2",
     "buffer-equal": "0.0.1",
     "usbtinyisp": "0.0.3"
   }
