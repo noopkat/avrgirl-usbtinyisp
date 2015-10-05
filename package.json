@@ -18,5 +18,8 @@
     "adafruit"
   ],
   "author": "Suz Hinton",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "usbtinyisp": "0.0.3"
+  }
 }
