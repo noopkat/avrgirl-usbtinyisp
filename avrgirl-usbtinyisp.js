@@ -14,7 +14,7 @@ function avrgirlUsbTinyIsp (options) {
   this.debug = this.options.debug ? console.log : function() {};
 
   var usbOptions = {
-    log: this.options.debug,
+    log: this.debug,
     // this pid and vid will probably vary between devices
     // it would be a better experience for users to add support for all by autosniffing for a connected device
     // just hardwiring (heh) to be the sf pocket avr for now
@@ -28,8 +28,9 @@ function avrgirlUsbTinyIsp (options) {
 
   EventEmitter.call(this);
 
+  var self = this;
   this.programmer.open(function() {
-    setImmediate(emitReady, self)
+    setImmediate(emitReady, self);
   });
 }
 
