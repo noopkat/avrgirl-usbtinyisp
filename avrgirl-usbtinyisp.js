@@ -3,6 +3,7 @@ var C = require('./lib/c');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var usbtinyisp = require('usbtinyisp');
+var bufferEqual = require('buffer-equal');
 
 function avrgirlUsbTinyIsp (options) {
   this.options = {
@@ -92,8 +93,12 @@ avrgirlUsbTinyIsp.prototype.getSignature = function (callback) {
   getSigByte();
 };
 
-avrgirlUsbTinyIsp.prototype.verifySignature = function (callback) {
-
+avrgirlUsbTinyIsp.prototype.verifySignature = function (sig, data, callback) {
+  var error = null;
+  if (!bufferEqual(data, sig)) {
+    error = new Error('Failed to verify: signature does not match.');
+  }
+  callback(error);
 };
 
 avrgirlUsbTinyIsp.prototype.writeFlash = function (data, callback) {
