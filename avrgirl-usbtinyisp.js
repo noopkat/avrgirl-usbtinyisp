@@ -77,12 +77,14 @@ avrgirlUsbTinyIsp.prototype.getChipSignature = function (callback) {
   var cmd = new Buffer(signature.read);
   var sigLen = signature.size;
   var set = 0;
+  var sigPos = 3;
+
+  var self = this;
 
   function getSigByte() {
-    this.programmer.spi(cmd, function (error, data) {
+    self.programmer.spi(cmd, function (error, data) {
       if (error) { return callback(error); }
-      // response[set] = data[sigPos];
-      response[set] = data;
+      response[set] = data[sigPos];
       set += 1;
       cmd[2] = set;
       if (set < sigLen) {
