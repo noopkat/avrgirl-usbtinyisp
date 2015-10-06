@@ -119,10 +119,6 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
 
   async.whilst(
     function testEndOfFile() {
-      // case for data being flashed being less than one page in size
-      if (pageAddress === 0 && hex.length < pageSize) {
-        return false;
-      }
       return pageAddress < hex.length;
     },
     function programPage (pagedone) {
@@ -137,7 +133,7 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
          self.loadAddress(memType, useAddress, done);
         },
         function calcNextPage (done) {
-          pageAddress = pageAddress + data.length;
+          pageAddress = pageAddress + pageSize;
           setTimeout(done, 6);
         }
       ],
