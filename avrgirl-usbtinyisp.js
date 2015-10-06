@@ -117,6 +117,8 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
   var addressOffset = 1;
   var data;
 
+  // console.log('pagesize:', pageSize, addressOffset);
+
   async.whilst(
     function testEndOfFile() {
       return pageAddress < hex.length;
@@ -125,6 +127,7 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
       async.series([
         function writeToPage (done) {
           data = hex.slice(pageAddress, (hex.length > pageSize ? (pageAddress + pageSize) : hex.length - 1));
+          // console.log('datalen:', data.length, pageAddress);
           // fix this hard coded 0 delay
           self.loadPage(memType, 0, pageAddress, data, done);
         },
