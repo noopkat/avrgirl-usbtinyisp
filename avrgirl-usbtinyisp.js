@@ -63,6 +63,11 @@ avrgirlUsbTinyIsp.prototype.exitProgrammingMode = function (callback) {
 };
 
 avrgirlUsbTinyIsp.prototype.setSCK = function (rate, callback) {
+  // preparing for next version is usbtinyisp to be published allowing for custom clock rate
+  if (!callback) {
+    var callback = rate;
+  }
+
   if (typeof rate !== 'number' || rate < C.SCK_MIN || rate > C.SCK_MAX) {
     return callback(new Error('Could not set SCK: rate should be a number between ' + C.SCK_MIN + ' and ' + C.SCK_MAX + '.'));
   }
@@ -117,8 +122,6 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
   var addressOffset = 1;
   var data;
 
-  // console.log('pagesize:', pageSize, addressOffset);
-
   async.whilst(
     function testEndOfFile() {
       return pageAddress < hex.length;
@@ -127,7 +130,6 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
       async.series([
         function writeToPage (done) {
           data = hex.slice(pageAddress, (hex.length > pageSize ? (pageAddress + pageSize) : hex.length - 1));
-          // console.log('datalen:', data.length, pageAddress);
           // fix this hard coded 0 delay
           self.loadPage(memType, 0, pageAddress, data, done);
         },
