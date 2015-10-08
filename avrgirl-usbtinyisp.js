@@ -6,15 +6,14 @@ var bufferEqual = require('buffer-equal');
 var async = require('async');
 
 function avrgirlUsbTinyIsp (options) {
+  // set up noisy or quiet
+  this.debug = options.debug ? console.log : function() {};
+
   this.options = {
     sck: options.sck || C.SCK_DEFAULT,
     debug: options.debug || false,
-    chip: options.chip
-  };
-
-  this.debug = this.options.debug ? console.log : function() {};
-
-  var usbOptions = {
+    chip: options.chip,
+    // for usbtinyisp lib
     log: this.debug,
     // this pid and vid will probably vary between devices
     // it would be a better experience for users to add support for all by autosniffing for a connected device
@@ -23,9 +22,10 @@ function avrgirlUsbTinyIsp (options) {
     vid: 6017
   };
 
+
   //console.log(usb.getDeviceList());
 
-  this.programmer = new usbtinyisp(usbOptions);
+  this.programmer = new usbtinyisp(this.options);
 
   EventEmitter.call(this);
 
