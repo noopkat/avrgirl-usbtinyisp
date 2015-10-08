@@ -165,9 +165,7 @@ avrgirlUsbTinyIsp.prototype.loadPage = function (memType, delay, address, buffer
 };
 
 avrgirlUsbTinyIsp.prototype.loadAddress = function (memType, address, callback) {
-  // this here the bytes should be taken from write[1] array for each memtype instead
-  // this is just to see if it's working
-  var memCmd = (memType === 'flash') ? 0x4C : 0xC2;
+  var memCmd = this.options.chip[memType].write[1];
   var low = address & 0xff;
   var high = (address >> 8) & 0xff;
   var cmd = new Buffer([memCmd, high, low, 0x00]);
