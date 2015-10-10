@@ -240,4 +240,8 @@ avrgirlUsbTinyIsp.prototype.eraseChip = function (callback) {
   });
 };
 
+avrgirlUsbTinyIsp.prototype.close = function () {
+  this.programmer.close();
+};
+
 module.exports = avrgirlUsbTinyIsp;
