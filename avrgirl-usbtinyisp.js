@@ -4,6 +4,7 @@ var EventEmitter = require('events').EventEmitter;
 var usbtinyisp = require('usbtinyisp');
 var bufferEqual = require('buffer-equal');
 var async = require('async');
+var programmers = require('./lib/programmers');
 //var usb = require('usb');
 
 function avrgirlUsbTinyIsp (options) {
@@ -22,7 +23,9 @@ function avrgirlUsbTinyIsp (options) {
     programmer: options.programmer || null
   };
 
-  var p = this.options.programmer;
+  // fix this pls self, it's very unattractive
+  // do an error check too
+  var p = this.options.programmer ? programmers[this.options.programmer] : null;
   this.options.pid = p ? p.pid : 3231;
   this.options.vid = p ? p.vid : 6017;
 
@@ -241,7 +244,7 @@ avrgirlUsbTinyIsp.prototype.eraseChip = function (callback) {
 };
 
 avrgirlUsbTinyIsp.prototype.close = function () {
-  this.programmer.close();
+  return this.programmer.close();
 };
 
 module.exports = avrgirlUsbTinyIsp;
