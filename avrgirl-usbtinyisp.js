@@ -4,24 +4,27 @@ var EventEmitter = require('events').EventEmitter;
 var usbtinyisp = require('usbtinyisp');
 var bufferEqual = require('buffer-equal');
 var async = require('async');
+//var usb = require('usb');
 
 function avrgirlUsbTinyIsp (options) {
   // set up noisy or quiet
   this.debug = options.debug ? console.log : function() {};
+
+  // most people won't need this level of debug output
+  var hackerMode = options.hackerMode || false;
 
   this.options = {
     sck: options.sck || C.SCK_DEFAULT,
     debug: options.debug || false,
     chip: options.chip,
     // for usbtinyisp lib
-    log: this.debug,
-    // this pid and vid will probably vary between devices
-    // it would be a better experience for users to add support for all by autosniffing for a connected device
-    // just hardwiring (heh) to be the sf pocket avr for now
-    pid: 3231,
-    vid: 6017
+    log: hackerMode ? this.debug : function() {},
+    programmer: options.programmer || null
   };
 
+  var p = this.options.programmer;
+  this.options.pid = p ? p.pid : 3231;
+  this.options.vid = p ? p.vid : 6017;
 
   //console.log(usb.getDeviceList());
 
