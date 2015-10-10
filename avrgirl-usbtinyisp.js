@@ -124,6 +124,9 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
   var addressOffset = options[memType].addressOffset;
   var addressOffset = 1;
   var data;
+  var page = 0;
+
+  this.debug('page length:', hex.length / pageSize);
 
   async.whilst(
     function testEndOfFile() {
@@ -132,13 +135,44 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
     function programPage (pagedone) {
       async.series([
         function writeToPage (done) {
+          page += 1;
+          self.debug('page:', page);
           data = hex.slice(pageAddress, (hex.length > pageSize ? (pageAddress + pageSize) : hex.length - 1));
           // fix this hard coded 0 delay
           self.loadPage(memType, 0, pageAddress, data, done);
         },
         function loadAddress (done) {
+          var times = 0;
           useAddress = pageAddress >> addressOffset;
-         self.loadAddress(memType, useAddress, done);
+          // try to load next address
+          tryAddress();
+
+          // we loop over this until we no longer get a libusb IO error.
+          // this is for the Adafruit Trinket as it's a little slow to write pages
+          function tryAddress() {
+            self.loadAddress(memType, useAddress, function(error) {
+              handleState(error);
+            });
+          };
+
+          // checks for error and bumps try times count
+          function handleState(error) {
+          if (!error) {
+              self.debug('no error');
+              times = 0;
+              done();
+            } else {
+              times += 1;
+              if (times < 35) {
+                self.debug('trying again')
+                setTimeout(tryAddress, 100);
+              } else {
+                times = 0;
+                self.debug('ran out of attempts');
+                done(error);
+              }
+            }
+          }
         },
         function calcNextPage (done) {
           pageAddress = pageAddress + pageSize;
