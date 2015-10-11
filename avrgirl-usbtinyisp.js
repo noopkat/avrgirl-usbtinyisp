@@ -7,6 +7,11 @@ var async = require('async');
 var programmers = require('./lib/programmers');
 //var usb = require('usb');
 
+/**
+ * Constructor
+ *
+ * @param {object} options - options for consumer to pass in
+ */
 function avrgirlUsbTinyIsp (options) {
   // set up noisy or quiet
   this.debug = options.debug ? console.log : function() {};
@@ -31,22 +36,31 @@ function avrgirlUsbTinyIsp (options) {
 
   //console.log(usb.getDeviceList());
 
+  // create new instance of usbtiny isp as programmer instance
   this.programmer = new usbtinyisp(this.options);
 
   EventEmitter.call(this);
 
   var self = this;
   this.programmer.open(function() {
-    setImmediate(emitReady, self);
+    setImmediate(_emitReady, self);
   });
 }
 
 util.inherits(avrgirlUsbTinyIsp, EventEmitter);
 
-function emitReady (self) {
+// ready event emitter
+function _emitReady (self) {
   self.emit('ready');
 }
 
+
+/**
+ * Primes the programmer and the microchip for programming
+ * Sets the clock speed of the programmer, and enables programming mode on the chip
+ *
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype.enterProgrammingMode = function (callback) {
   var self = this;
   var cmd = new Buffer(this.options.chip.pgmEnable);
@@ -62,12 +76,24 @@ avrgirlUsbTinyIsp.prototype.enterProgrammingMode = function (callback) {
   });
 };
 
+
+/**
+ * Powers down the programmer, allows the chip to leave programming mode
+ *
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype.exitProgrammingMode = function (callback) {
   this.programmer.powerDown(function (error) {
     return callback(error);
   });
 };
 
+/**
+ * Sets the clock speed of the programmer
+ *
+ * @param {number} rate - sck speed to set (not yet available)
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype.setSCK = function (rate, callback) {
   // preparing for next version is usbtinyisp to be published allowing for custom clock rate
   if (!callback) {
@@ -83,6 +109,11 @@ avrgirlUsbTinyIsp.prototype.setSCK = function (rate, callback) {
   });
 };
 
+/**
+ * Returns the signature of the microchip connected, in array format
+ *
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype.getChipSignature = function (callback) {
   var response = [];
   var signature = this.options.chip.signature;
@@ -93,6 +124,7 @@ avrgirlUsbTinyIsp.prototype.getChipSignature = function (callback) {
 
   var self = this;
 
+  // looping function, according to length of the signature requested
   function getSigByte() {
     self.programmer.spi(cmd, function (error, data) {
       if (error) { return callback(error); }
@@ -110,14 +142,29 @@ avrgirlUsbTinyIsp.prototype.getChipSignature = function (callback) {
   getSigByte();
 };
 
-avrgirlUsbTinyIsp.prototype.verifySignature = function (sig, data, callback) {
+/**
+ * Compares two signatures to see if they match, returns a boolean
+ *
+ * @param {hex} sig1 - the first siganture to be compared
+ * @param {hex} sig2 - the second siganture to be compared
+ * @param {function} callback - function to run upon completion/error
+ */
+avrgirlUsbTinyIsp.prototype.verifySignature = function (sig1, sig2, callback) {
   var error = null;
-  if (!bufferEqual(data, sig)) {
+  // using @substack's buffer equal is the safest for all versions of nodejs
+  if (!bufferEqual(sig1, sig2)) {
     error = new Error('Failed to verify: signature does not match.');
   }
   callback(error);
 };
 
+/**
+ * Writes the contents of a hex file to the requested memory type of the chip.
+ *
+ * @param {string} memType - the type of memory being written. Either 'flash' or 'eeprom'
+ * @param {buffer} hex - a buffer containing the compiled hex program data
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype._writeMem = function (memType, hex, callback) {
   var self = this;
   var options = this.options.chip;
@@ -129,7 +176,8 @@ avrgirlUsbTinyIsp.prototype._writeMem = function (memType, hex, callback) {
   var data;
   var page = 0;
 
-  this.debug('page length:', hex.length / pageSize);
+  this.debug('writing to ' + memType + ', please wait...');
+  this.hackerLog('page length:', hex.length / pageSize);
 
   async.whilst(
     // we exit out of this while loop when we are at the end of the hex file
@@ -160,10 +208,26 @@ avrgirlUsbTinyIsp.prototype._writeMem = function (memType, hex, callback) {
   );
 };
 
+/**
+ * Pulls out a (page sized) chunk of data from the hex buffer supplied, returns as a sliced buffer
+ *
+ * @param {number} address - the starting byte index of the chunk
+ * @param {number} size - the page size, the size of data chunk you wish to receive back
+ * @param {buffer} hex - a buffer containing the compiled hex program data
+ */
 avrgirlUsbTinyIsp.prototype._preparePageData = function (address, size, hex) {
   return hex.slice(address, (hex.length > size ? (address + size) : hex.length - 1));
 };
 
+/**
+ * Writes data to a page in the specified memory
+ *
+ * @param {string} memType - the type of memory being written. Either 'flash' or 'eeprom'
+ * @param {number} delay - the chip's delay setting for memory writing
+ * @param {number} address - the starting address index to write from
+ * @param {buffer} hex - a buffer containing the compiled hex program data
+* @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype._loadPage = function (memType, delay, address, buffer, callback) {
   if (memType === 'flash') {
     this.programmer.writeFlash(delay, address, buffer, function (error, result) {
@@ -176,6 +240,13 @@ avrgirlUsbTinyIsp.prototype._loadPage = function (memType, delay, address, buffe
   }
 };
 
+/**
+ * Loads an address location in memory, to prepare for writing to a page
+ *
+ * @param {string} memType - the type of memory being written. Either 'flash' or 'eeprom'
+ * @param {number} address - the starting address index to write from
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype._loadAddress = function (memType, address, callback) {
   var memCmd = this.options.chip[memType].write[1];
   var low = address & 0xff;
@@ -187,6 +258,15 @@ avrgirlUsbTinyIsp.prototype._loadAddress = function (memType, address, callback)
   });
 }
 
+/**
+ * Polls for a successful libusb transfer from the loadAddress method. Stops an auto-failure upon a busy chip.
+ * Will retry 15 times before calling back with an error.
+ *
+ * @param {string} memType - the type of memory being written. Either 'flash' or 'eeprom'
+ * @param {number} address - the starting address index to write from
+ * @param {hex} offset - the chip's general offset setting
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype._pollForAddress = function (memType, address, offset, callback) {
   var self = this;
   var times = 0;
@@ -226,6 +306,12 @@ avrgirlUsbTinyIsp.prototype._pollForAddress = function (memType, address, offset
   }
 };
 
+/**
+ * The public, straightforward method for writing hex data to the flash memory of a connected chip.
+ *
+ * @param {buffer} hex - a buffer containing the parsed hex file
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype.writeFlash = function (hex, callback) {
   // optional convenience method
   this._writeMem('flash', hex, function (error) {
@@ -233,10 +319,23 @@ avrgirlUsbTinyIsp.prototype.writeFlash = function (hex, callback) {
   });
 };
 
+/**
+ * The public, straightforward method for reading data from the flash memory of a connected chip.
+ *
+ * @param {number} length - the length of bytes wishing to be read
+ * @param {number} address - the starting address from where to read
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype.readFlash = function (length, address, callback) {
   return this.programmer.readFlash(this.options.chip.flash.delay, address, length, callback);
 };
 
+/**
+ * The public, straightforward method for writing hex data to the eeprom memory of a connected chip.
+ *
+ * @param {buffer} hex - a buffer containing the parsed hex file
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype.writeEeprom = function (hex, callback) {
   // optional convenience method
   this._writeMem('eeprom', hex, function (error) {
@@ -244,10 +343,22 @@ avrgirlUsbTinyIsp.prototype.writeEeprom = function (hex, callback) {
   });
 };
 
+/**
+ * The public, straightforward method for reading data from the eeprom memory of a connected chip.
+ *
+ * @param {number} length - the length of bytes wishing to be read
+ * @param {number} address - the starting address from where to read
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype.readEeprom = function (length, address, callback) {
   return this.programmer.readEeprom(this.options.chip.eeprom.delay, address, length, callback);
 };
 
+/**
+ * The public method for erasing both eeprom and flash memories at the same time.
+ *
+ * @param {function} callback - function to run upon completion/error
+ */
 avrgirlUsbTinyIsp.prototype.eraseChip = function (callback) {
   var self = this;
   var options = this.options;
@@ -263,6 +374,9 @@ avrgirlUsbTinyIsp.prototype.eraseChip = function (callback) {
   });
 };
 
+/**
+ * Will close the connection to the programmer and chip.
+ */
 avrgirlUsbTinyIsp.prototype.close = function () {
   return this.programmer.close();
 };
