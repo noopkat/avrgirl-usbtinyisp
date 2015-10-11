@@ -145,12 +145,16 @@ avrgirlUsbTinyIsp.prototype.getChipSignature = function (callback) {
 /**
  * Compares two signatures to see if they match, returns a boolean
  *
- * @param {hex} sig1 - the first siganture to be compared
- * @param {hex} sig2 - the second siganture to be compared
+ * @param {buffer} sig1 - the first siganture to be compared
+ * @param {buffer} sig2 - the second siganture to be compared
  * @param {function} callback - function to run upon completion/error
  */
 avrgirlUsbTinyIsp.prototype.verifySignature = function (sig1, sig2, callback) {
   var error = null;
+  // check sigs are buffers
+  if (!Buffer.isBuffer(sig1) || !Buffer.isBuffer(sig2)) {
+    return callback(new Error('Could not verify signature: both signatures should be buffers.'));
+  }
   // using @substack's buffer equal is the safest for all versions of nodejs
   if (!bufferEqual(sig1, sig2)) {
     error = new Error('Failed to verify: signature does not match.');
