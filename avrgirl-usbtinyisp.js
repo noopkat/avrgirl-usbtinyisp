@@ -12,14 +12,14 @@ function avrgirlUsbTinyIsp (options) {
   this.debug = options.debug ? console.log : function() {};
 
   // most people won't need this level of debug output
-  var hackerMode = options.hackerMode || false;
+  this.hackerLog = options.hackerMode ? console.log : function() {};
 
   this.options = {
     sck: options.sck || C.SCK_DEFAULT,
     debug: options.debug || false,
     chip: options.chip,
     // for usbtinyisp lib
-    log: hackerMode ? this.debug : function() {},
+    log: this.hackerLog,
     programmer: options.programmer || null
   };
 
