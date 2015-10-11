@@ -249,8 +249,17 @@ avrgirlUsbTinyIsp.prototype.readEeprom = function (length, address, callback) {
 };
 
 avrgirlUsbTinyIsp.prototype.eraseChip = function (callback) {
-  this.programmer.spi(new Buffer(this.options.chip.erase.cmd), function (error) {
-    return callback(error);
+  var self = this;
+  var options = this.options;
+
+  // adafruit trinket has a reported erase delay of 900000µs but 500000µs seems to work ok, probably due to the runtime
+  // other usbtinyisp devices just need the regular delay, or theoretically no delay at all.
+  var delay = (options.programmer === 'trinket') ? 500 : options.chip.erase.delay;
+
+  this.programmer.spi(new Buffer(options.chip.erase.cmd), function (error) {
+    return setTimeout(function() {
+      callback(error);
+    }, delay);
   });
 };
 
