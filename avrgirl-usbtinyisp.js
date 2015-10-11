@@ -118,7 +118,7 @@ avrgirlUsbTinyIsp.prototype.verifySignature = function (sig, data, callback) {
   callback(error);
 };
 
-avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
+avrgirlUsbTinyIsp.prototype._writeMem = function (memType, hex, callback) {
   var self = this;
   var options = this.options.chip;
   var pageAddress = 0;
@@ -132,59 +132,27 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
   this.debug('page length:', hex.length / pageSize);
 
   async.whilst(
+    // we exit out of this while loop when we are at the end of the hex file
     function testEndOfFile() {
       return pageAddress < hex.length;
     },
+    // main function to program the current page with data
     function programPage (pagedone) {
-      async.series([
-        function writeToPage (done) {
-          page += 1;
-          self.debug('page:', page);
-          data = hex.slice(pageAddress, (hex.length > pageSize ? (pageAddress + pageSize) : hex.length - 1));
-          // fix this hard coded 0 delay
-          self.loadPage(memType, 0, pageAddress, data, done);
-        },
-        function loadAddress (done) {
-          var times = 0;
-          useAddress = pageAddress >> addressOffset;
-          // try to load next address
-          tryAddress();
+      // grab the correct chunk of data from our hex file
+      var pageData = self._preparePageData(pageAddress, pageSize, hex);
 
-          // we loop over this until we no longer get a libusb IO error.
-          // this is for the Adafruit Trinket as it's a little slow to write pages
-          function tryAddress() {
-            self.loadAddress(memType, useAddress, function(error) {
-              handleState(error);
-            });
-          };
-
-          // checks for error and bumps try times count
-          function handleState(error) {
-          if (!error) {
-              self.debug('no error');
-              times = 0;
-              done();
-            } else {
-              times += 1;
-              if (times < 35) {
-                self.debug('trying again')
-                setTimeout(tryAddress, 100);
-              } else {
-                times = 0;
-                self.debug('ran out of attempts');
-                done(error);
-              }
-            }
-          }
-        },
-        function calcNextPage (done) {
-          pageAddress = pageAddress + pageSize;
-          setTimeout(done, 6);
-        }
-      ],
-      function pageIsDone (error) {
-        pagedone(error);
+      // load data into current page
+      self._loadPage(memType, 0, pageAddress, pageData, function (error) {
+        if (error) { pagedone(error); }
+        // load address once writing is done
+        self._pollForAddress(memType, pageAddress, addressOffset, function (error) {
+          // calculate the next page position
+          if (!error) { pageAddress = pageAddress + pageSize; }
+          // callback for the next page to be programmed
+          pagedone(error);
+        });
       });
+
     },
     function (error) {
       return callback(error);
@@ -192,7 +160,11 @@ avrgirlUsbTinyIsp.prototype.writeMem = function (memType, hex, callback) {
   );
 };
 
-avrgirlUsbTinyIsp.prototype.loadPage = function (memType, delay, address, buffer, callback) {
+avrgirlUsbTinyIsp.prototype._preparePageData = function (address, size, hex) {
+  return hex.slice(address, (hex.length > size ? (address + size) : hex.length - 1));
+};
+
+avrgirlUsbTinyIsp.prototype._loadPage = function (memType, delay, address, buffer, callback) {
   if (memType === 'flash') {
     this.programmer.writeFlash(delay, address, buffer, function (error, result) {
       return callback(error);
@@ -204,7 +176,7 @@ avrgirlUsbTinyIsp.prototype.loadPage = function (memType, delay, address, buffer
   }
 };
 
-avrgirlUsbTinyIsp.prototype.loadAddress = function (memType, address, callback) {
+avrgirlUsbTinyIsp.prototype._loadAddress = function (memType, address, callback) {
   var memCmd = this.options.chip[memType].write[1];
   var low = address & 0xff;
   var high = (address >> 8) & 0xff;
@@ -215,9 +187,48 @@ avrgirlUsbTinyIsp.prototype.loadAddress = function (memType, address, callback) 
   });
 }
 
+avrgirlUsbTinyIsp.prototype._pollForAddress = function (memType, address, offset, callback) {
+  var self = this;
+  var times = 0;
+  var useAddress = address >> offset;
+  // try to load next address
+  tryAddress();
+
+  // we loop over this until we no longer get a libusb IO error.
+  // this is for the Adafruit Trinket as it's both a chip breakout and a programmer in one
+  function tryAddress() {
+    self._loadAddress(memType, useAddress, function(error) {
+      // let's check for an error and act accordingly
+      handleState(error);
+    });
+  };
+
+  // checks for error and bumps try times count
+  function handleState(error) {
+    times += 1;
+    // this error is usually a libusb IO errno 1 (ie. the chip is busy still writing to the memory)
+    if (!error) {
+      self.hackerLog('_pollForAddress: success');
+      // success at loading the address, so we callback with no error
+      callback(null);
+    } else {
+      // how may times have we tried already without success?
+      if (times < 15) {
+        self.hackerLog('_pollForAddress: retrying ' + times);
+        // we haven't exhausted our attempts, so let's try again
+        setTimeout(tryAddress, 50);
+      } else {
+        self.hackerLog('_pollForAddress: ran out of attempts');
+        // exhausted attempts and no success, callback with the error
+        callback(error);
+      }
+    }
+  }
+};
+
 avrgirlUsbTinyIsp.prototype.writeFlash = function (hex, callback) {
   // optional convenience method
-  this.writeMem('flash', hex, function (error) {
+  this._writeMem('flash', hex, function (error) {
     return callback(error);
   });
 };
@@ -227,8 +238,8 @@ avrgirlUsbTinyIsp.prototype.readFlash = function (length, address, callback) {
 };
 
 avrgirlUsbTinyIsp.prototype.writeEeprom = function (hex, callback) {
-   // optional convenience method
-  this.writeMem('eeprom', hex, function (error) {
+  // optional convenience method
+  this._writeMem('eeprom', hex, function (error) {
     return callback(error);
   });
 };
