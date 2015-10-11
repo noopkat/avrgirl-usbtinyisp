@@ -5,7 +5,6 @@ var usbtinyisp = require('usbtinyisp');
 var bufferEqual = require('buffer-equal');
 var async = require('async');
 var programmers = require('./lib/programmers');
-//var usb = require('usb');
 
 /**
  * Constructor
@@ -23,8 +22,7 @@ function avrgirlUsbTinyIsp (options) {
     sck: options.sck || C.SCK_DEFAULT,
     debug: options.debug || false,
     chip: options.chip,
-    // for usbtinyisp lib
-    log: this.hackerLog,
+    log: this.hackerLog,  // for usbtinyisp lib
     programmer: options.programmer || null
   };
 
@@ -33,8 +31,6 @@ function avrgirlUsbTinyIsp (options) {
   var p = this.options.programmer ? programmers[this.options.programmer] : null;
   this.options.pid = p ? p.pid : 3231;
   this.options.vid = p ? p.vid : 6017;
-
-  //console.log(usb.getDeviceList());
 
   // create new instance of usbtiny isp as programmer instance
   this.programmer = new usbtinyisp(this.options);
@@ -53,7 +49,6 @@ util.inherits(avrgirlUsbTinyIsp, EventEmitter);
 function _emitReady (self) {
   self.emit('ready');
 }
-
 
 /**
  * Primes the programmer and the microchip for programming
