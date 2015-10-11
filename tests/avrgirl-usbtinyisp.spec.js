@@ -4,6 +4,8 @@ var test = require('tape');
 var sinon = require('sinon');
 var proxyquire = require('proxyquire');
 var bufferEqual = require('buffer-equal');
+var intelhex = require('intel-hex');
+var fs = require('fs')
 var chip = require('avrgirl-chips-json').attiny85;
 var usbtinyispmock = require('./helpers/usbtinyisp-mock');
 
@@ -19,8 +21,9 @@ var options = {
   programmer: 'sf-pocket-avr'
 };
 
-  this.options.pid = p ? p.pid : 3231;
-  this.options.vid = p ? p.vid : 6017;
+// test bin
+var data = fs.readFileSync('trinketblink.hex', { encoding: 'utf8' });
+var prBin = intelhex.parse(data).data;
 
 function testBuffer(spy, call, arg, buffer) {
   return (spy.called && spy.args[call][arg] && bufferEqual(spy.args[call][arg], buffer));
