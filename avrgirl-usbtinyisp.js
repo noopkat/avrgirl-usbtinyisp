@@ -100,7 +100,8 @@ avrgirlUsbTinyIsp.prototype.setSCK = function (rate, callback) {
     var callback = rate;
   }
 
-  if (typeof rate !== 'number' || rate < C.SCK_MIN || rate > C.SCK_MAX) {
+  // error checking for rate being a number
+  if ((typeof rate !== 'number') || (rate < C.SCK_MIN) || (rate > C.SCK_MAX)) {
     return callback(new Error('Could not set SCK: rate should be a number between ' + C.SCK_MIN + ' and ' + C.SCK_MAX + '.'));
   }
 
@@ -317,6 +318,10 @@ avrgirlUsbTinyIsp.prototype._pollForAddress = function (memType, address, offset
  * @param {function} callback - function to run upon completion/error
  */
 avrgirlUsbTinyIsp.prototype.writeFlash = function (hex, callback) {
+  // check hex is a buffer
+  if (!Buffer.isBuffer(hex)) {
+    return callback(new Error('Could not write to flash: supplied hex argument should to be a buffer.'));
+  }
   // optional convenience method
   this._writeMem('flash', hex, function (error) {
     return callback(error);
@@ -331,6 +336,14 @@ avrgirlUsbTinyIsp.prototype.writeFlash = function (hex, callback) {
  * @param {function} callback - function to run upon completion/error
  */
 avrgirlUsbTinyIsp.prototype.readFlash = function (length, address, callback) {
+  // check length is a number
+  if (typeof length !== 'number') {
+    return callback(new Error('Could not read from flash: length should be a number'));
+  }
+  // check address is a number
+  if (typeof address !== 'number') {
+    return callback(new Error('Could not read from flash: address should be a number'));
+  }
   return this.programmer.readFlash(this.options.chip.flash.delay, address, length, callback);
 };
 
@@ -341,6 +354,10 @@ avrgirlUsbTinyIsp.prototype.readFlash = function (length, address, callback) {
  * @param {function} callback - function to run upon completion/error
  */
 avrgirlUsbTinyIsp.prototype.writeEeprom = function (hex, callback) {
+  // check hex is a buffer
+  if (!Buffer.isBuffer(hex)) {
+    return callback(new Error('Could not write to eeprom: supplied hex argument should to be a buffer.'));
+  }
   // optional convenience method
   this._writeMem('eeprom', hex, function (error) {
     return callback(error);
@@ -355,6 +372,14 @@ avrgirlUsbTinyIsp.prototype.writeEeprom = function (hex, callback) {
  * @param {function} callback - function to run upon completion/error
  */
 avrgirlUsbTinyIsp.prototype.readEeprom = function (length, address, callback) {
+  // check length is a number
+  if (typeof length !== 'number') {
+    return callback(new Error('Could not read from eeprom: length should be a number'));
+  }
+  // check address is a number
+  if (typeof address !== 'number') {
+    return callback(new Error('Could not read from eeprom: address should be a number'));
+  }
   return this.programmer.readEeprom(this.options.chip.eeprom.delay, address, length, callback);
 };
 
@@ -370,6 +395,8 @@ avrgirlUsbTinyIsp.prototype.eraseChip = function (callback) {
   // adafruit trinket has a reported erase delay of 900000µs but 500000µs seems to work ok, probably due to the runtime
   // other usbtinyisp devices just need the regular delay, or theoretically no delay at all.
   var delay = (options.programmer === 'trinket') ? 500 : options.chip.erase.delay;
+
+  this.debug('erasing, please wait...');
 
   this.programmer.spi(new Buffer(options.chip.erase.cmd), function (error) {
     return setTimeout(function() {
