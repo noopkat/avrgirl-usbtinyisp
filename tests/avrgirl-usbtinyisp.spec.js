@@ -22,7 +22,7 @@ var FLoptions = {
 };
 
 // test bin
-var data = fs.readFileSync('trinketblink.hex', { encoding: 'utf8' });
+var data = fs.readFileSync(__dirname + '/hex/trinketblink.hex', { encoding: 'utf8' });
 var prBin = intelhex.parse(data).data;
 
 function testBuffer(spy, call, arg, buffer) {
