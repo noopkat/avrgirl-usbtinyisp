@@ -4,4 +4,4 @@
 
 ![avrgirl logo](http://i.imgur.com/hFXbPIe.png)
 
-👯 Releasing soon, stay tuned! ☺️
+👯 Releasing soon, stay tuned! 
