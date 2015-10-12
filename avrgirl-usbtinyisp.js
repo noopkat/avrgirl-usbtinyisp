@@ -315,7 +315,7 @@ avrgirlUsbTinyIsp.prototype._pollForAddress = function (memType, address, offset
 avrgirlUsbTinyIsp.prototype.writeFlash = function (hex, callback) {
   // check hex is a buffer
   if (!Buffer.isBuffer(hex)) {
-    return callback(new Error('Could not write to flash: supplied hex argument should to be a buffer.'));
+    return callback(new Error('Could not write to flash: supplied hex argument should be a buffer.'));
   }
   // optional convenience method
   this._writeMem('flash', hex, function (error) {
@@ -351,7 +351,7 @@ avrgirlUsbTinyIsp.prototype.readFlash = function (length, address, callback) {
 avrgirlUsbTinyIsp.prototype.writeEeprom = function (hex, callback) {
   // check hex is a buffer
   if (!Buffer.isBuffer(hex)) {
-    return callback(new Error('Could not write to eeprom: supplied hex argument should to be a buffer.'));
+    return callback(new Error('Could not write to eeprom: supplied hex argument should be a buffer.'));
   }
   // optional convenience method
   this._writeMem('eeprom', hex, function (error) {

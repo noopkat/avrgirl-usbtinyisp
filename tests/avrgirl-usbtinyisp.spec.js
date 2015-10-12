@@ -77,3 +77,20 @@ test('[ AVRGIRL-USBTINYISP ] method presence', function (t) {
     }
   }
 });
+
+test('[ AVRGIRL-USBTINYISP ] ::verifySignature', function (t) {
+  var a = new avrgirl(FLoptions);
+  var data = new Buffer([0x01, 0x02, 0x03]);
+  var sig2 = new Buffer([0x01, 0x02, 0x03]);
+  var sig3 = new Buffer([0xf3, 0xf4, 0xf5]);
+
+  t.plan(2);
+
+  a.verifySignature(sig2, data, function(error) {
+    t.error(error, 'no error on identical signatures');
+  });
+
+  a.verifySignature(sig3, data, function(error) {
+    t.ok(error, 'returns error on non matching signature');
+  });
+});
