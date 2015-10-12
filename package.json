@@ -23,7 +23,7 @@
   "dependencies": {
     "async": "^1.4.2",
     "buffer-equal": "0.0.1",
-    "usbtinyisp": "0.0.3"
+    "usbtinyisp": "git://github.com/noopkat/usbtinyisp"
   },
   "devDependencies": {
     "avrgirl-chips-json": "^2.0.1",
