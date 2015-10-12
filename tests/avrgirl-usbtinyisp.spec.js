@@ -10,7 +10,7 @@ var chip = require('avrgirl-chips-json').attiny85;
 var usbtinyispmock = require('./helpers/usbtinyisp-mock');
 
 // module to test
-var avrgirl = proxyquire('../avrgirl-usbtinyisp', { 'usbtinyisp': usbtinyispmock });
+var avrgirl = proxyquire.noCallThru().load('../avrgirl-usbtinyisp', { 'usbtinyisp': usbtinyispmock });
 
 // test options to pass in to most tests
 var FLoptions = {
