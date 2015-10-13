@@ -133,4 +133,17 @@ test('[ AVRGIRL-USBTINYISP ] ::exitProgrammingMode', function (t) {
   });
 });
 
+test('[ AVRGIRL-USBTINYISP ] ::getChipSignature', function (t) {
+  var a = new avrgirl(FLoptions);
+  var spy = sinon.spy(a.programmer, 'spi');
+  var count = 3;
 
+  t.plan(4);
+
+  a.getChipSignature(function(error, data) {
+    t.error(error, 'no error on callback');
+    t.equals(spy.callCount, count, 'called spi for each byte');
+    t.equals(typeof data, 'object', 'got parameter data back, type is object');
+    t.equals(data.length, count, 'got parameter data back, correct length');
+  });
+});
