@@ -94,3 +94,43 @@ test('[ AVRGIRL-USBTINYISP ] ::verifySignature', function (t) {
     t.ok(error, 'returns error on non matching signature');
   });
 });
+
+test('[ AVRGIRL-USBTINYISP ] ::close', function (t) {
+  var a = new avrgirl(FLoptions);
+  var spy = sinon.spy(a.programmer, 'close');
+
+  t.plan(1);
+
+  a.close();
+  t.ok(spy.called, 'called programmer.close');
+});
+
+
+test('[ AVRGIRL-USBTINYISP ] ::enterProgrammingMode', function (t) {
+  var a = new avrgirl(FLoptions);
+  var spy = sinon.spy(a.programmer, 'spi');
+  var spy2 = sinon.spy(a.programmer, 'setSCK');
+  var cmd = new Buffer([172, 83, 0, 0]);
+
+  t.plan(3);
+
+  a.enterProgrammingMode(function (error) {
+    t.error(error, 'no error on callback');
+    t.ok(spy2.called, 'called programmer.setSCK');
+    t.ok(testBuffer(spy, 0, 0, cmd), 'called programmer.spi with correct buffer');
+  });
+});
+
+test('[ AVRGIRL-USBTINYISP ] ::exitProgrammingMode', function (t) {
+  var a = new avrgirl(FLoptions);
+  var spy = sinon.spy(a.programmer, 'powerDown');
+
+  t.plan(2);
+
+  a.exitProgrammingMode(function (error) {
+    t.error(error, 'no error on callback');
+    t.ok(spy.called, 'called programmer.powerDown');
+  });
+});
+
+

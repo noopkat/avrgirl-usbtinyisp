@@ -8,11 +8,11 @@ usbtinyisp.prototype.open = function(callback) {
 
 usbtinyisp.prototype.close = function() {};
 
-usbtinyisp.prototype.spi = function (callback) {
+usbtinyisp.prototype.spi = function (buffer, callback) {
   return callback(null, new Buffer([0x00, 0x00, 0x00]));
 };
 
-usbtinyisp.prototype.setSCK = function (buffer, callback) {
+usbtinyisp.prototype.setSCK = function (callback) {
   return callback(null);
 };
 
