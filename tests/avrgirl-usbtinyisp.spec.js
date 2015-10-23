@@ -147,3 +147,5 @@ test('[ AVRGIRL-USBTINYISP ] ::getChipSignature', function (t) {
     t.equals(data.length, count, 'got parameter data back, correct length');
   });
 });
+
+// @noopkat to write rest soon.
