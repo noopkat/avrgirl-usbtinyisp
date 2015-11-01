@@ -1,18 +1,24 @@
 language: node_js
 node_js:
-  - "0.12"
-  - "0.11"
-  - "0.10"
-  - "iojs-v2.5.0"
-  - "iojs-v1.0.4"
+- "4.2"
+- "0.12"
+- "0.11"
+- "0.10"
+- "iojs-v2.5.0"
+- "iojs-v1.0.4"
+
+env:
+- CC=clang CXX=clang++ npm_config_clang=1
 
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
     packages:
+    - gcc-4.8
+    - g++-4.8
     - build-essential
     - libudev-dev
-    - usbutils
-    - lsusb
 
 before_script:
 - npm install -g istanbul
