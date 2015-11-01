@@ -59,12 +59,14 @@ Turn on debug logging in the console. Provides status messages when running meth
 
 Which USBtinyISP programmer is being used? String values for supported programmers defined below:
 
-+ SparkFun Pocket Programmer: `sf-pocker-avr`
-+ SparkFun Tiny Programmer: `sf-tiny-avr`
-+ Adafruit USBtinyISP Programmer: `adafruit-avr`
-+ Adafruit Trinket: `trinket`
-+ Arduino Gemma: `gemma`
-+ Adafruit Gemma v2: `gemma2`
+|Programmer|Option String|
+|:----------|:--------------|
+|SparkFun Pocket Programmer|`sf-pocker-avr`|
+|SparkFun Tiny Programmer|`sf-tiny-avr`|
+|Adafruit USBtinyISP Programmer|`adafruit-avr`|
+|Adafruit Trinket|`trinket`|
+|Arduino Gemma|`gemma`|
+|Adafruit Gemma v2|`gemma2`|
 
 **options.chip**
 
