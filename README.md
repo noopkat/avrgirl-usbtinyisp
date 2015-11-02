@@ -72,6 +72,8 @@ Which USBtinyISP programmer is being used? String values for supported programme
 
 **options.chip**
 
+*Note:* this property is not required if your programmer is an Arduino Gemma, Adafruit Gemma v2 , or Adafruit Trinket.
+
 The chip property is an object that follows a strict format / signature. It specifies the configuration properties of the microchip you are using.  You'll need to know and supply this configuration. You can find this from AVR Studio, the [avrgirl-chips-json package](https://www.npmjs.com/package/avrgirl-chips-json), or use the [AVRDUDE conf API](avrdude-conf.herokuapp.com). Pull requests to the [avrgirl-chips-json repo](https://github.com/noopkat/avrgirl-chips-json) with additional chips is most welcome.
 
 Here is the required signature, provided as an example of the ATtiny85:

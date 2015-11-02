@@ -7,7 +7,7 @@ var async = require('async');
 var programmers = require('./lib/programmers');
 var intelhex = require('intel-hex');
 var fs = require('fs');
-
+var chips = require('avrgirl-chips-json');
 /**
  * Constructor
  *
@@ -23,7 +23,7 @@ function avrgirlUsbTinyIsp (options) {
   this.options = {
     sck: options.sck || C.SCK_DEFAULT,
     debug: options.debug || false,
-    chip: options.chip,
+    chip: options.chip || chips.attiny85,
     log: this.hackerLog,  // for usbtinyisp lib
     programmer: options.programmer || null
   };
