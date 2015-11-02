@@ -5,6 +5,8 @@ var usbtinyisp = require('usbtinyisp');
 var bufferEqual = require('buffer-equal');
 var async = require('async');
 var programmers = require('./lib/programmers');
+var intelhex = require('intel-hex');
+var fs = require('fs');
 
 /**
  * Constructor
@@ -13,7 +15,7 @@ var programmers = require('./lib/programmers');
  */
 function avrgirlUsbTinyIsp (options) {
   // set up noisy or quiet
-  this.debug = options.debug ? console.log : function() {};
+  this.debug = options.debug ? console.log.bind(console) : function() {};
 
   // most people won't need this level of debug output
   this.hackerLog = options.hackerMode ? console.log : function() {};
@@ -38,7 +40,11 @@ function avrgirlUsbTinyIsp (options) {
   EventEmitter.call(this);
 
   var self = this;
-  this.programmer.open(function() {
+  this.programmer.open(function(error) {
+    if (error) {
+      console.error(error);
+      return;
+    }
     setImmediate(_emitReady, self);
   });
 }
@@ -173,8 +179,27 @@ avrgirlUsbTinyIsp.prototype._writeMem = function (memType, hex, callback) {
   var pageSize = options[memType].pageSize;
   var addressOffset = options[memType].addressOffset;
   var addressOffset = 1;
-  var data;
+  var data, readFile;
   var page = 0;
+
+  if (Buffer.isBuffer(hex)) {
+    data = hex;
+  } else if (typeof hex === 'string') {
+    try {
+      readFile = fs.readFileSync(hex, { encoding: 'utf8' });
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        return callback(new Error('could not write ' + memType + ': please supply a valid path to a hex file.'));
+      } else {
+        return callback(e);
+      }
+    }
+
+    data = intelhex.parse(readFile).data;
+
+  } else {
+    return callback(new Error('could not write ' + memType + ': please supply either a hex buffer or a valid path to a hex file.'));
+  }
 
   this.debug('writing to ' + memType + ', please wait...');
   this.hackerLog('page length:', hex.length / pageSize);
@@ -182,12 +207,12 @@ avrgirlUsbTinyIsp.prototype._writeMem = function (memType, hex, callback) {
   async.whilst(
     // we exit out of this while loop when we are at the end of the hex file
     function testEndOfFile() {
-      return pageAddress < hex.length;
+      return pageAddress < data.length;
     },
     // main function to program the current page with data
     function programPage (pagedone) {
       // grab the correct chunk of data from our hex file
-      var pageData = self._preparePageData(pageAddress, pageSize, hex);
+      var pageData = self._preparePageData(pageAddress, pageSize, data);
 
       // load data into current page
       self._loadPage(memType, 0, pageAddress, pageData, function (error) {
@@ -313,10 +338,6 @@ avrgirlUsbTinyIsp.prototype._pollForAddress = function (memType, address, offset
  * @param {function} callback - function to run upon completion/error
  */
 avrgirlUsbTinyIsp.prototype.writeFlash = function (hex, callback) {
-  // check hex is a buffer
-  if (!Buffer.isBuffer(hex)) {
-    return callback(new Error('Could not write to flash: supplied hex argument should be a buffer.'));
-  }
   // optional convenience method
   this._writeMem('flash', hex, function (error) {
     return callback(error);
@@ -349,10 +370,7 @@ avrgirlUsbTinyIsp.prototype.readFlash = function (length, address, callback) {
  * @param {function} callback - function to run upon completion/error
  */
 avrgirlUsbTinyIsp.prototype.writeEeprom = function (hex, callback) {
-  // check hex is a buffer
-  if (!Buffer.isBuffer(hex)) {
-    return callback(new Error('Could not write to eeprom: supplied hex argument should be a buffer.'));
-  }
+
   // optional convenience method
   this._writeMem('eeprom', hex, function (error) {
     return callback(error);

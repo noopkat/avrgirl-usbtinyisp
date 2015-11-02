@@ -232,32 +232,24 @@ avrgirl.eraseChip(function(error) {
 
 ### writeFlash
 
-Writes a buffer to the flash memory of the microchip. Provide a buffer and a callback respectively.  
-Protip: use the package [intel-hex](https://www.npmjs.com/package/intel-hex) if you need to parse a .hex file into a buffer for this method. See the example.
+Writes a buffer to the flash memory of the microchip. Provide a filepath string, and a callback, respectively.  
 
 Returns a null error upon callback if successful.
 
 ```javascript
-var intelhex = require('intel-hex');
-var buffer = fs.readFileSync('Blink.cpp.hex', {encoding: 'utf8'});
-
-avrgirl.writeFlash(buffer, function(error) {
+avrgirl.writeFlash('Blink.cpp.hex', function(error) {
   console.log(error);
 });
 ```
 
 ### writeEeprom
 
-Writes a buffer to the eeprom memory of the microchip. Provide a buffer and a callback respectively.  
-Protip: use the package [intel-hex](https://www.npmjs.com/package/intel-hex) if you need to parse a .hex file into a buffer for this method. See the example.
+Writes a buffer to the eeprom memory of the microchip. Provide a filepath string, and a callback, respectively.  
 
 Returns a null error upon callback if successful.
 
 ```javascript
-var intelhex = require('intel-hex');
-var buffer = fs.readFileSync('myEeprom.cpp.hex', {encoding: 'utf8'});
-
-avrgirl.writeEeprom(buffer, function(error) {
+avrgirl.writeEeprom('myEeprom.cpp.hex', function(error) {
   console.log(error);
 });
 ```
