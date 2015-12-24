@@ -152,12 +152,6 @@ The following will upload a program to the flash memory of an attiny85:
 var async = require('async');
 var usbtinyisp = require('avrgirl-usbtinyisp');
 var chips = require('avrgirl-chips-json');
-var intelhex = require('intel-hex');
-var fs = require('fs');
-
-// open and parse program code
-var data = fs.readFileSync('Blink-eeprom.cpp.hex', { encoding: 'utf8' });
-var pData = intelhex.parse(data).data;
 
 var avrgirl = new usbtinyisp({
 	debug: true, 
@@ -169,7 +163,7 @@ avrgirl.on('ready', function() {
   // upload a program to flash memory
   async.series([
     avrgirl.enterProgrammingMode,
-    avrgirl.writeFlash.bind(avrgirl, prBin),
+    avrgirl.writeFlash.bind(avrgirl, 'Blink-eeprom.cpp.hex'),
     avrgirl.exitProgrammingMode
     ], function (error) {
       console.log('err', error);
