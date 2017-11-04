@@ -182,6 +182,10 @@ avrgirlUsbTinyIsp.prototype._writeMem = function (memType, hex, callback) {
   var data, readFile;
   var page = 0;
 
+  if(!pageSize){
+    return callback(new Error('could not write ' + memType + ': pageSize is not set for your chip'));
+  }
+
   if (Buffer.isBuffer(hex)) {
     data = hex;
   } else if (typeof hex === 'string') {
