@@ -23,11 +23,11 @@
   "author": "Suz Hinton",
   "license": "MIT",
   "dependencies": {
-    "avrgirl-chips-json": "^2.0.1",
-    "async": "^1.4.2",
+    "async": "^1.5.2",
+    "avrgirl-chips-json": "^2.0.2",
     "buffer-equal": "0.0.1",
-    "usbtinyisp": "git://github.com/noopkat/usbtinyisp",
-    "intel-hex": "^0.1.1"
+    "intel-hex": "^0.1.1",
+    "usbtinyisp": "git://github.com/noopkat/usbtinyisp"
   },
   "devDependencies": {
     "istanbul": "^0.3.22",
