@@ -121,6 +121,57 @@ test('[ AVRGIRL-USBTINYISP ] ::enterProgrammingMode', function (t) {
   });
 });
 
+test('[ AVRGIRL-USBTINYISP ] ::_writeMem with no page size specified', function (t) {
+  var badchip = {
+    "name": "ATtiny85",
+    "timeout": 200,
+    "stabDelay": 100,
+    "cmdexeDelay": 25,
+    "syncLoops": 32,
+    "byteDelay": 0,
+    "pollIndex": 3,
+    "pollValue": 83,
+    "preDelay": 1,
+    "postDelay": 1,
+    "pgmEnable": [172, 83, 0, 0],
+    "erase": {
+      "cmd": [172, 128, 0, 0],
+      "delay": 45,
+      "pollMethod": 1
+    },
+    "flash": {
+      "write": [64, 76, 0],
+      "read": [32, 0, 0],
+      "mode": 65,
+      "blockSize": 64,
+      "delay": 10,
+      "poll2": 255,
+      "poll1": 255,
+      "size": 8192,
+      "pageSize": null,
+      "pages": 128,
+      "addressOffset": 0
+    }
+  };
+
+  var newoptions = {
+    sck: 10,
+    debug: false,
+    chip: badchip,
+    log: false,  // for usbtinyisp lib
+    programmer: 'sf-pocket-avr'
+  };
+
+  var a = new avrgirl(newoptions);
+
+  t.plan(2);
+
+  a._writeMem('flash', '/hex/myhexfile.hex', function (error) {
+    t.ok(error instanceof Error, 'error is present on callback');
+    t.equals(error.message, 'could not write flash: pageSize is not set for your chip', 'error message matches expected');
+  });
+});
+
 test('[ AVRGIRL-USBTINYISP ] ::exitProgrammingMode', function (t) {
   var a = new avrgirl(FLoptions);
   var spy = sinon.spy(a.programmer, 'powerDown');
