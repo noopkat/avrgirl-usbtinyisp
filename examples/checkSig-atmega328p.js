@@ -19,7 +19,7 @@ const checkSig = (error, actualSignature) => {
   if(expectedSignatureBuffer.equals(Buffer.from(actualSignature))){
     console.log('Hooray! Your chip signature matches!');
   } else {
-    console.error('Expected: ', expectedSignature, ' got: ', actualSignature, ', check wiring or that you are using the right chip');
+    console.error(`Expected: ${expectedSignature} got: ${actualSignature}, check wiring or that you are using the right chip`);
   }
 };
 
