@@ -2,7 +2,6 @@
 
 # avrgirl-usbtinyisp
 
-
 ![avrgirl logo](http://i.imgur.com/hFXbPIe.png)
 
 ## Installation
@@ -34,7 +33,6 @@ Current feature implementation of avrgirl-usbtinyisp:
 
 Let's say you'd like to use NodeJS to flash and erase microchips. This could be an integrated circuit with an embedded AVR microchip. For example, you could flash a precompiled program to the chip with an USBtinyISP compatible programmer, such as a [SparkFun Pocket Programmer](https://www.sparkfun.com/products/9825).
 
-
 ## Before you start
 
 ### Providing options
@@ -45,9 +43,9 @@ The options needed have the following signature:
 
 ```javascript
 var options = {
-	debug: [boolean],
-	chip: [object], 
-	programmer: [string]
+  debug: [boolean],
+  chip: [object], 
+  programmer: [string]
 };
 ```
 
@@ -149,24 +147,28 @@ Here is the required signature, provided as an example of the ATtiny85:
 The following will upload a program to the flash memory of an attiny85:
 
 ```javascript
-var async = require('async');
-var usbtinyisp = require('avrgirl-usbtinyisp');
-var chips = require('avrgirl-chips-json');
+const async = require('async');
+const usbtinyisp = require('avrgirl-usbtinyisp');
+const chips = require('avrgirl-chips-json');
 
-var avrgirl = new usbtinyisp({
-	debug: true, 
-	chip: chips.attiny85, 
-	programmer: 'sf-pocket-avr'
+let avrgirl = new usbtinyisp({
+  debug: true,
+  chip: chips.attiny85,
+  programmer: 'sf-pocket-avr'
 });
 
 avrgirl.on('ready', function() {
   // upload a program to flash memory
   async.series([
-    avrgirl.enterProgrammingMode,
-    avrgirl.writeFlash.bind(avrgirl, 'Blink-eeprom.cpp.hex'),
-    avrgirl.exitProgrammingMode
-    ], function (error) {
-      console.log('err', error);
+    avrgirl.enterProgrammingMode.bind(avrgirl),
+    avrgirl.writeFlash.bind(avrgirl, 'your-compiled-cpp-file.cpp.hex'),
+    avrgirl.exitProgrammingMode.bind(avrgirl),
+    ], (error) => {
+      if(error){
+        console.log('Error: ', error);
+      } else {
+        console.log('Chip flashed!');
+      }
       avrgirl.close();
     }
   );
@@ -174,7 +176,6 @@ avrgirl.on('ready', function() {
 ```
 
 ## Available methods
-
 
 ### getChipSignature
 
