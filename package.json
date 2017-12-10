@@ -3,6 +3,9 @@
   "version": "1.0.3",
   "description": "avrgirl wrapper for usbtinyisp programmer interactions",
   "main": "avrgirl-usbtinyisp.js",
+  "engines": {
+    "node": ">=7.6"
+  },
   "scripts": {
     "test": "tape ./tests/*.spec.js | tap-spec",
     "cover": "istanbul cover ./tests/avrgirl-usbtinyisp.spec.js && istanbul-coveralls"
