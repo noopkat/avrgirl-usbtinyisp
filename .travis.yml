@@ -19,9 +19,3 @@ addons:
     - build-essential
     - libudev-dev
 
-before_script:
-- npm install -g istanbul
-- npm install -g istanbul-coveralls
-
-after_success:
-- npm run cover
