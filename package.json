@@ -10,7 +10,8 @@
     "prepublishOnly": "npm run build",
     "test": "npm run build && tape ./tests/*.spec.js | tap-spec",
     "cover": "istanbul cover ./tests/avrgirl-usbtinyisp.spec.js && istanbul-coveralls",
-    "build": "babel src -d ."
+    "build": "babel src -d .",
+    "dev": "babel src -d . --watch"
   },
   "keywords": [
     "avrgirl",
