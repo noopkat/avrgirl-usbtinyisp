@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "tape ./tests/*.spec.js | tap-spec",
-    "cover": "istanbul cover ./tests/avrgirl-usbtinyisp.spec.js && istanbul-coveralls"
+    "cover": "istanbul cover ./tests/avrgirl-usbtinyisp.spec.js && istanbul-coveralls",
+    "build": "babel src -d ."
   },
   "keywords": [
     "avrgirl",
@@ -33,6 +34,8 @@
     "usbtinyisp": "git://github.com/noopkat/usbtinyisp"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "istanbul": "^0.3.22",
     "istanbul-coveralls": "^1.0.3",
     "proxyquire": "^1.7.3",
