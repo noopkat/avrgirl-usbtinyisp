@@ -1,6 +1,6 @@
 {
   "name": "avrgirl-usbtinyisp",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "avrgirl wrapper for usbtinyisp programmer interactions",
   "main": "avrgirl-usbtinyisp.js",
   "engines": {
