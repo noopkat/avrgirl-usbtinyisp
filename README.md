@@ -312,3 +312,13 @@ avrgirl.spi(buffer, function(error) {
   console.log(error);
 });
 ```
+
+## Contributing
+
+To get this running locally, please follow the steps below:
+
+1. Clone this repository with git `cd` into the new clone directory
+2. Run `npm install`
+3. The source files for editing are in the `src` directory
+4. You'll need to run `npm run dev` to watch your changes and rebuild while you develop.
+

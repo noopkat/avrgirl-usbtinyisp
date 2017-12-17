@@ -3,9 +3,15 @@
   "version": "1.0.4",
   "description": "avrgirl wrapper for usbtinyisp programmer interactions",
   "main": "avrgirl-usbtinyisp.js",
+  "engines": {
+    "node": ">=7.6"
+  },
   "scripts": {
-    "test": "tape ./tests/*.spec.js | tap-spec",
-    "cover": "istanbul cover ./tests/avrgirl-usbtinyisp.spec.js && istanbul-coveralls"
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && tape ./tests/*.spec.js | tap-spec",
+    "cover": "istanbul cover ./tests/avrgirl-usbtinyisp.spec.js && istanbul-coveralls",
+    "build": "babel src -d .",
+    "dev": "babel src -d . --watch"
   },
   "keywords": [
     "avrgirl",
@@ -30,6 +36,8 @@
     "usbtinyisp": "git://github.com/noopkat/usbtinyisp"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "istanbul": "^0.3.22",
     "istanbul-coveralls": "^1.0.3",
     "proxyquire": "^1.7.3",
