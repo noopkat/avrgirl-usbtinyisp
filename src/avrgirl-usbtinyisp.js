@@ -36,9 +36,15 @@ class avrgirlUsbTinyIsp extends EventEmitter {
 
     // fix this pls self, it's very unattractive
     // do an error check too
-    var p = self.options.programmer ? programmers[self.options.programmer] : null;
-    self.options.pid = p ? p.pid : 3231;
-    self.options.vid = p ? p.vid : 6017;
+    if (options.programmer === 'custom') {
+      if (!options.pid || !options.vid) throw new Error('please ensure your custom programmer options include both vid and pid properties');
+      self.options.pid = options.pid;
+      self.options.vid = options.vid;
+    } else {
+      var p = self.options.programmer ? programmers[self.options.programmer] : null;
+      self.options.pid = p ? p.pid : 3231;
+      self.options.vid = p ? p.vid : 6017;
+    }
 
     // create new instance of usbtiny isp as programmer instance
     self.programmer = new usbtinyisp(self.options);
