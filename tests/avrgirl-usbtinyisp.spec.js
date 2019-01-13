@@ -3,7 +3,6 @@ var test = require('tape');
 // test helpers
 var sinon = require('sinon');
 var proxyquire = require('proxyquire');
-var bufferEqual = require('buffer-equal');
 var intelhex = require('intel-hex');
 var fs = require('fs')
 var chip = require('avrgirl-chips-json').attiny85;
@@ -26,7 +25,7 @@ var data = fs.readFileSync(__dirname + '/hex/trinketblink.hex', { encoding: 'utf
 var prBin = intelhex.parse(data).data;
 
 function testBuffer(spy, call, arg, buffer) {
-  return (spy.called && spy.args[call][arg] && bufferEqual(spy.args[call][arg], buffer));
+  return (spy.called && spy.args[call][arg] && buffer.equals(spy.args[call][arg]));
 };
 
 // run c tests
@@ -97,9 +96,9 @@ test('[ AVRGIRL-USBTINYISP ] method presence', function (t) {
 
 test('[ AVRGIRL-USBTINYISP ] ::verifySignature', function (t) {
   var a = new avrgirl(FLoptions);
-  var data = new Buffer([0x01, 0x02, 0x03]);
-  var sig2 = new Buffer([0x01, 0x02, 0x03]);
-  var sig3 = new Buffer([0xf3, 0xf4, 0xf5]);
+  var data = Buffer.from([0x01, 0x02, 0x03]);
+  var sig2 = Buffer.from([0x01, 0x02, 0x03]);
+  var sig3 = Buffer.from([0xf3, 0xf4, 0xf5]);
 
   t.plan(2);
 
@@ -127,7 +126,7 @@ test('[ AVRGIRL-USBTINYISP ] ::enterProgrammingMode', function (t) {
   var a = new avrgirl(FLoptions);
   var spy = sinon.spy(a.programmer, 'spi');
   var spy2 = sinon.spy(a.programmer, 'setSCK');
-  var cmd = new Buffer([172, 83, 0, 0]);
+  var cmd = Buffer.from([172, 83, 0, 0]);
 
   t.plan(3);
 
