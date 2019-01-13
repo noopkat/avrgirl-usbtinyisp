@@ -38,6 +38,23 @@ test('[ AVRGIRL-USBTINYISP ] initialise', function (t) {
   t.end();
 });
 
+
+test('[ AVRGIRL-USBTINYISP ] ::initialise custom programmer', function (t) {
+  var FLoptions = {
+    sck: 10,
+    debug: false,
+    chip: chip,
+    log: false,  // for usbtinyisp lib
+    programmer: 'custom'
+  };
+
+  const createNewAvrgirl = () => new avrgirl(FLoptions);
+  t.throws(createNewAvrgirl, Error, 'error throws when custom programmer does not supply vid and pid props');
+  t.end();
+});
+
+// test bin
+
 test('[ AVRGIRL-USBTINYISP ] device ready', function (t) {
   var a = new avrgirl(FLoptions);
   a.on('ready', function() {
