@@ -61,7 +61,7 @@ Which USBtinyISP programmer is being used? String values for supported programme
 
 |Programmer|Option String|
 |:----------|:--------------|
-|SparkFun Pocket Programmer|`sf-pocker-avr`|
+|SparkFun Pocket Programmer|`sf-pocket-avr`|
 |SparkFun Tiny Programmer|`sf-tiny-avr`|
 |Adafruit USBtinyISP Programmer|`adafruit-avr`|
 |Adafruit Trinket|`trinket`|
