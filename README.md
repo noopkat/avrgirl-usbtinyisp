@@ -20,6 +20,7 @@ Supported devices:
 + Adafruit Trinket
 + Arduino Gemma
 + Adafruit Gemma v2
++ other programmers that speak usbtinyisp protocol (see custom programmer section in this readme)
 
 Current feature implementation of avrgirl-usbtinyisp:
 
@@ -67,6 +68,28 @@ Which USBtinyISP programmer is being used? String values for supported programme
 |Adafruit Trinket|`trinket`|
 |Arduino Gemma|`gemma`|
 |Adafruit Gemma v2|`gemma2`|
+|custom|`custom`|
+
+The `custom` programmer option is for any programmers that aren't on the list above, but still speak the usbtinyisp protocol. If you specify the programmer as `custom`, you'll need to also specify the vendor id and product id of the prorgammer using the `vid` and `pid` properties in your options.
+
+Example:
+
+```javascript
+var options = {
+  chip: [whatever chip you're programming], 
+  programmer: 'custom',
+  pid: '0C9F',
+  vid: '1781'
+};
+```
+
+**options.pid**
+
+The product id of the programmer. Only necessary if you are using a programmer of the `custom` type. See above for more.
+
+**options.vid**
+
+The vendor id of the programmer. Only necessary if you are using a programmer of the `custom` type. See above for more.
 
 **options.chip**
 

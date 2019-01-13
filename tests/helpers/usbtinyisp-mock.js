@@ -9,7 +9,7 @@ usbtinyisp.prototype.open = function(callback) {
 usbtinyisp.prototype.close = function() {};
 
 usbtinyisp.prototype.spi = function (buffer, callback) {
-  return callback(null, new Buffer([0x00, 0x00, 0x00]));
+  return callback(null, Buffer.from([0x00, 0x00, 0x00]));
 };
 
 usbtinyisp.prototype.setSCK = function (callback) {
@@ -21,19 +21,19 @@ usbtinyisp.prototype.powerDown = function (callback) {
 };
 
 usbtinyisp.prototype.readFlash = function (length, address, callback) {
-  var data = new Buffer(length);
+  var data = Buffer.alloc(length);
   data.fill(0xFF);
   return callback(null, data);
 };
 
 usbtinyisp.prototype.readEeprom = function (length, address, callback) {
-  var data = new Buffer(length);
+  var data = Buffer.alloc(length);
   data.fill(0xFF);
   return callback(null, data);
 };
 
 usbtinyisp.prototype.readFlash = function (length, address, callback) {
-  var data = new Buffer(length);
+  var data = Buffer.alloc(length);
   data.fill(0xFF);
   data[1] = 0x00;
   return callback(null, data);

@@ -2,7 +2,6 @@ const C = require('./lib/c');
 const util = require('util');
 const EventEmitter = require('events').EventEmitter;
 const usbtinyisp = require('usbtinyisp');
-const bufferEqual = require('buffer-equal');
 const async = require('async');
 const programmers = require('./lib/programmers');
 const intelhex = require('intel-hex');
@@ -36,9 +35,15 @@ class avrgirlUsbTinyIsp extends EventEmitter {
 
     // fix this pls self, it's very unattractive
     // do an error check too
-    var p = self.options.programmer ? programmers[self.options.programmer] : null;
-    self.options.pid = p ? p.pid : 3231;
-    self.options.vid = p ? p.vid : 6017;
+    if (options.programmer === 'custom') {
+      if (!options.pid || !options.vid) throw new Error('please ensure your custom programmer options include both vid and pid properties');
+      self.options.pid = options.pid;
+      self.options.vid = options.vid;
+    } else {
+      var p = self.options.programmer ? programmers[self.options.programmer] : null;
+      self.options.pid = p ? p.pid : 3231;
+      self.options.vid = p ? p.vid : 6017;
+    }
 
     // create new instance of usbtiny isp as programmer instance
     self.programmer = new usbtinyisp(self.options);
@@ -61,7 +66,7 @@ class avrgirlUsbTinyIsp extends EventEmitter {
   enterProgrammingMode(callback) {
     var self = this;
 
-    var cmd = new Buffer(self.options.chip.pgmEnable);
+    var cmd = Buffer.from(self.options.chip.pgmEnable);
 
     self.setSCK(self.options.sck, error => {
       if (error) {
@@ -110,7 +115,7 @@ class avrgirlUsbTinyIsp extends EventEmitter {
   getChipSignature(callback) {
     var response = [];
     var signature = this.options.chip.signature;
-    var cmd = new Buffer(signature.read);
+    var cmd = Buffer.from(signature.read);
     var sigLen = signature.size;
     var set = 0;
     var sigPos = 3;
@@ -149,8 +154,7 @@ class avrgirlUsbTinyIsp extends EventEmitter {
       return callback(new Error('Could not verify signature: both signatures should be buffers.'));
     }
 
-    // using @substack's buffer equal is the safest for all versions of nodejs
-    if (!bufferEqual(sig1, sig2)) {
+    if (!sig1.equals(sig2)) {
       return callback(new Error('Failed to verify: signature does not match.'))
     }
 
@@ -266,7 +270,7 @@ class avrgirlUsbTinyIsp extends EventEmitter {
     var memCmd = this.options.chip[memType].write[1];
     var low = address & 0xff;
     var high = (address >> 8) & 0xff;
-    var cmd = new Buffer([memCmd, high, low, 0x00]);
+    var cmd = Buffer.from([memCmd, high, low, 0x00]);
 
     this.programmer.spi(cmd, (error, result) => callback(error, result));
   }
@@ -395,7 +399,7 @@ class avrgirlUsbTinyIsp extends EventEmitter {
 
     this.debug('erasing, please wait...');
 
-    this.programmer.spi(new Buffer(options.chip.erase.cmd), error => setTimeout(() => callback(error), delay));
+    this.programmer.spi(Buffer.from(options.chip.erase.cmd), error => setTimeout(() => callback(error), delay));
   }
 
   /**
