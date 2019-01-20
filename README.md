@@ -6,7 +6,15 @@
 
 ## Installation
 
-`npm install avrgirl-usbtinyisp`
+```
+npm install avrgirl-usbtinyisp
+```
+
+If you’re on Linux and you get an error about a missing `libudev-dev` package, you have to install the following as per [node-usb: Installation](https://github.com/tessel/node-usb#installation).
+
+```
+sudo apt-get install build-essential libudev-dev
+```
 
 ## What is this?
 
@@ -45,7 +53,7 @@ The options needed have the following signature:
 ```javascript
 var options = {
   debug: [boolean],
-  chip: [object], 
+  chip: [object],
   programmer: [string]
 };
 ```
@@ -76,7 +84,7 @@ Example:
 
 ```javascript
 var options = {
-  chip: [whatever chip you're programming], 
+  chip: [whatever chip you’re programming],
   programmer: 'custom',
   pid: '0C9F',
   vid: '1781'
@@ -202,7 +210,7 @@ avrgirl.on('ready', function() {
 
 ### getChipSignature
 
-Gets the signature of the microchip. 
+Gets the signature of the microchip.
 
 Returns a buffer containing the signature bytes.
 
@@ -240,7 +248,7 @@ avrgirl.exitProgrammingMode(function(error) {
 
 Erases both the flash and EEPROM memories on the microchip. Good practice to do before flashing any new data.
 
-💣💣💣  Literally erases **everything** please be careful 💣💣💣  
+💣💣💣  Literally erases **everything** please be careful 💣💣💣
 
 Returns a null error upon callback if successful.
 
@@ -252,7 +260,7 @@ avrgirl.eraseChip(function(error) {
 
 ### writeFlash
 
-Writes a buffer to the flash memory of the microchip. Provide a filepath string, and a callback, respectively.  
+Writes a buffer to the flash memory of the microchip. Provide a filepath string, and a callback, respectively.
 
 Returns a null error upon callback if successful.
 
@@ -264,7 +272,7 @@ avrgirl.writeFlash('Blink.cpp.hex', function(error) {
 
 ### writeEeprom
 
-Writes a buffer to the eeprom memory of the microchip. Provide a filepath string, and a callback, respectively.  
+Writes a buffer to the eeprom memory of the microchip. Provide a filepath string, and a callback, respectively.
 
 Returns a null error upon callback if successful.
 
@@ -276,7 +284,7 @@ avrgirl.writeEeprom('myEeprom.cpp.hex', function(error) {
 
 ### readFlash
 
-Reads a specified length of flash memory from the microchip. Takes a length integer (or hex) for the number of bytes to read, a starting address integer, and a callback as the arguments, respectively. 
+Reads a specified length of flash memory from the microchip. Takes a length integer (or hex) for the number of bytes to read, a starting address integer, and a callback as the arguments, respectively.
 
 Returns a null error and a buffer of the read bytes upon callback if successful.
 
@@ -290,7 +298,7 @@ avrgirl.readFlash(4, 0, function(error, data) {
 
 ### readEeprom
 
-Reads a specified length of flash memory from the microchip. Takes a length integer (or hex) for the number of bytes to read, a starting address integer, and a callback as the arguments, respectively. 
+Reads a specified length of flash memory from the microchip. Takes a length integer (or hex) for the number of bytes to read, a starting address integer, and a callback as the arguments, respectively.
 
 Returns a null error and a buffer of the read bytes upon callback if successful.
 
@@ -344,4 +352,3 @@ To get this running locally, please follow the steps below:
 2. Run `npm install`
 3. The source files for editing are in the `src` directory
 4. You'll need to run `npm run dev` to watch your changes and rebuild while you develop.
-
