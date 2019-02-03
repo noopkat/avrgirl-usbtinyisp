@@ -29,7 +29,7 @@
     "async": "^2.6.1",
     "avrgirl-chips-json": "^2.0.3",
     "intel-hex": "^0.1.1",
-    "usbtinyisp": "git://github.com/noopkat/usbtinyisp"
+    "usbtinyisp": "^0.0.4"
   },
   "devDependencies": {
     "istanbul": "^0.4.5",
