@@ -78,7 +78,7 @@ Which USBtinyISP programmer is being used? String values for supported programme
 |Adafruit Gemma v2|`gemma2`|
 |custom|`custom`|
 
-The `custom` programmer option is for any programmers that aren't on the list above, but still speak the usbtinyisp protocol. If you specify the programmer as `custom`, you'll need to also specify the vendor id and product id of the prorgammer using the `vid` and `pid` properties in your options.
+The `custom` programmer option is for any programmers that aren't on the list above, but still speak the usbtinyisp protocol. If you specify the programmer as `custom`, you'll need to also specify the vendor id and product id of the programmer using the `vid` and `pid` properties in your options. **Note: the pid and vid should be specified in stringifed decimal format, not hex!**
 
 Example:
 
@@ -86,8 +86,8 @@ Example:
 var options = {
   chip: [whatever chip you’re programming],
   programmer: 'custom',
-  pid: '0C9F',
-  vid: '1781'
+  pid: '6017',
+  vid: '3231'
 };
 ```
 
